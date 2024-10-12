@@ -41,11 +41,11 @@ public class projectSecurityConfig {
 //    @Bean
 //    public UserDetailsService userDetailsService(){
 //      UserDetails user=  User.withUsername("user")
-//                .password("EasyByte@12345")
+//                .password("EasyBytes@1234")
 //                .authorities("read")
 //                .build();
 //        UserDetails admin=  User.withUsername("admin")
-//                .password("EasyByte@12345")
+//                .password("EasyBytes@12345")
 //                .authorities("admin")
 //                .build();
 //
@@ -57,17 +57,13 @@ public class projectSecurityConfig {
 //        return new JdbcUserDetailsManager(dataSource);
 //    }
 
-
-
-
     @Bean
     public PasswordEncoder passwordEncoder(){
-      return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
     @Bean
     public CompromisedPasswordChecker compromisedPasswordChecker(){
-
         return new HaveIBeenPwnedRestApiPasswordChecker();
     }
 
