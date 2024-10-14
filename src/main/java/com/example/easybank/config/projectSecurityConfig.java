@@ -29,7 +29,8 @@ public class projectSecurityConfig {
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
        // 1/ http.authorizeHttpRequests((requests) -> requests.anyRequest().permitAll());
        // 1/http.authorizeHttpRequests((requests) -> requests.anyRequest().denyAll());
-        http.csrf(AbstractHttpConfigurer::disable)
+        http.requiresChannel(rcc -> rcc.anyRequest().requiresInsecure())//only http
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((requests) ->
                 requests.requestMatchers("/my-account","/my-balance").authenticated()
                         .requestMatchers("/notice","/error","/register").permitAll());
