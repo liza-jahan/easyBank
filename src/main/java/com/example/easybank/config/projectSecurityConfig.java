@@ -1,5 +1,6 @@
 package com.example.easybank.config;
 
+import com.example.easybank.exceptionhandling.CustomAccessDeniedHandler;
 import com.example.easybank.exceptionhandling.CustomBasicAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,16 +29,14 @@ public class projectSecurityConfig {
 
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-       // 1/ http.authorizeHttpRequests((requests) -> requests.anyRequest().permitAll());
-       // 1/http.authorizeHttpRequests((requests) -> requests.anyRequest().denyAll());
+        // 1/ http.authorizeHttpRequests((requests) -> requests.anyRequest().permitAll());
+        // 1/http.authorizeHttpRequests((requests) -> requests.anyRequest().denyAll());
         http.requiresChannel(rcc -> rcc.anyRequest().requiresInsecure())//only http
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests((requests) ->
-                requests.requestMatchers("/my-account","/my-balance").authenticated()
-                        .requestMatchers("/notice","/error","/register").permitAll());
-           http.formLogin(withDefaults());
-        http.httpBasic(hbc-> hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));
-        http.exceptionHandling(ehc-> ehc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));// It is an Global Config
+                .csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests((requests) -> requests.requestMatchers("/my-account", "/my-balance").authenticated().requestMatchers("/notice", "/error", "/register").permitAll());
+        http.formLogin(withDefaults());
+        http.httpBasic(hbc -> hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));
+        //  http.exceptionHandling(ehc-> ehc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));// It is an Global Config
+        http.exceptionHandling(ehc -> ehc.accessDeniedHandler(new CustomAccessDeniedHandler()).accessDeniedPage("/denied"));
 
 
         //2/ http.formLogin(AbstractHttpConfigurer::disable);
@@ -66,12 +65,12 @@ public class projectSecurityConfig {
 //    }
 
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
     @Bean
-    public CompromisedPasswordChecker compromisedPasswordChecker(){
+    public CompromisedPasswordChecker compromisedPasswordChecker() {
         return new HaveIBeenPwnedRestApiPasswordChecker();
     }
 
