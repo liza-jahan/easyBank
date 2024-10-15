@@ -1,5 +1,6 @@
 package com.example.easybank.config;
 
+import com.example.easybank.exceptionhandling.CustomBasicAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -35,9 +36,11 @@ public class projectSecurityConfig {
                 requests.requestMatchers("/my-account","/my-balance").authenticated()
                         .requestMatchers("/notice","/error","/register").permitAll());
            http.formLogin(withDefaults());
-         http.httpBasic(withDefaults());
+        http.httpBasic(hbc-> hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));
+        http.exceptionHandling(ehc-> ehc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));// It is an Global Config
 
-         //2/ http.formLogin(AbstractHttpConfigurer::disable);
+
+        //2/ http.formLogin(AbstractHttpConfigurer::disable);
         //2/http.httpBasic(fcl-> fcl.disable());
 
         return http.build();

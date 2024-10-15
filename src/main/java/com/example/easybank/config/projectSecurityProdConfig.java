@@ -1,5 +1,6 @@
 package com.example.easybank.config;
 
+import com.example.easybank.exceptionhandling.CustomBasicAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -21,13 +22,14 @@ public class projectSecurityProdConfig {
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
        // 1/ http.authorizeHttpRequests((requests) -> requests.anyRequest().permitAll());
        // 1/http.authorizeHttpRequests((requests) -> requests.anyRequest().denyAll());
-        http.requiresChannel(rcc -> rcc.anyRequest().requiresSecure()) //only https
-                .csrf(AbstractHttpConfigurer::disable)
+     //   http.requiresChannel(rcc -> rcc.anyRequest().requiresSecure()) //only https traffi
+              http  .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((requests) ->
                 requests.requestMatchers("/my-account","/my-balance").authenticated()
                         .requestMatchers("/notice","/error","/register").permitAll());
            http.formLogin(withDefaults());
-         http.httpBasic(withDefaults());
+           http.httpBasic(hbc-> hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));
+        // http.httpBasic(withDefaults());
 
          //2/ http.formLogin(AbstractHttpConfigurer::disable);
         //2/http.httpBasic(fcl-> fcl.disable());
