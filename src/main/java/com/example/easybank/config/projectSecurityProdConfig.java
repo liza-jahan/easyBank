@@ -24,10 +24,13 @@ public class projectSecurityProdConfig {
         // 1/ http.authorizeHttpRequests((requests) -> requests.anyRequest().permitAll());
         // 1/http.authorizeHttpRequests((requests) -> requests.anyRequest().denyAll());
         //   http.requiresChannel(rcc -> rcc.anyRequest().requiresSecure()) //only https traffi
-        http.csrf(AbstractHttpConfigurer::disable)
+        http.sessionManagement(smc -> smc.invalidSessionUrl("/invalidSession").maximumSessions(1).maxSessionsPreventsLogin(true))
+                .requiresChannel(rcc -> rcc.anyRequest().requiresInsecure())//only http
+
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((requests) ->
                         requests.requestMatchers("/my-account", "/my-balance").authenticated()
-                                .requestMatchers("/notice", "/error", "/register").permitAll());
+                                .requestMatchers("/notice", "/error", "/register","/invalidSession").permitAll());
         http.formLogin(withDefaults());
         http.httpBasic(hbc -> hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));
         http.exceptionHandling(ehc -> ehc.accessDeniedHandler(new CustomAccessDeniedHandler()).accessDeniedPage("/denied"));

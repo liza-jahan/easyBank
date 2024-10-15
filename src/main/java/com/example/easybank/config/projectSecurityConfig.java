@@ -31,8 +31,11 @@ public class projectSecurityConfig {
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         // 1/ http.authorizeHttpRequests((requests) -> requests.anyRequest().permitAll());
         // 1/http.authorizeHttpRequests((requests) -> requests.anyRequest().denyAll());
-        http.requiresChannel(rcc -> rcc.anyRequest().requiresInsecure())//only http
-                .csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests((requests) -> requests.requestMatchers("/my-account", "/my-balance").authenticated().requestMatchers("/notice", "/error", "/register").permitAll());
+        http.sessionManagement(smc -> smc.invalidSessionUrl("/invalidSession").maximumSessions(3).maxSessionsPreventsLogin(true))
+
+                .requiresChannel(rcc -> rcc.anyRequest().requiresInsecure())//only http
+                .csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests((requests) -> requests.requestMatchers("/my-account", "/my-balance").authenticated()
+                        .requestMatchers("/notice", "/error", "/register","/invalidSession").permitAll());
         http.formLogin(withDefaults());
         http.httpBasic(hbc -> hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));
         //  http.exceptionHandling(ehc-> ehc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));// It is an Global Config
