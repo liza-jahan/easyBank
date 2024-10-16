@@ -29,7 +29,7 @@ public class projectSecurityProdConfig {
 
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((requests) ->
-                        requests.requestMatchers("/my-account", "/my-balance").authenticated()
+                        requests.requestMatchers("/my-account", "/user","/my-balance").authenticated()
                                 .requestMatchers("/notice", "/error", "/register","/invalidSession").permitAll());
         http.formLogin(withDefaults());
         http.httpBasic(hbc -> hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));
