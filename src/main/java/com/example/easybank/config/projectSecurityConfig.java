@@ -35,7 +35,7 @@ public class projectSecurityConfig {
 
                 .requiresChannel(rcc -> rcc.anyRequest().requiresInsecure())//only http
                 .csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests((requests) -> requests.requestMatchers("/my-account", "/my-balance").authenticated()
-                        .requestMatchers("/notice","/user", "/error", "/register","/invalidSession").permitAll());
+                        .requestMatchers("/notices","/user", "/error", "/register","/invalidSession").permitAll());
         http.formLogin(withDefaults());
         http.httpBasic(hbc -> hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));
         //  http.exceptionHandling(ehc-> ehc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));// It is an Global Config

@@ -30,7 +30,7 @@ public class projectSecurityProdConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((requests) ->
                         requests.requestMatchers("/my-account", "/user","/my-balance").authenticated()
-                                .requestMatchers("/notice", "/error", "/register","/invalidSession").permitAll());
+                                .requestMatchers("/notices", "/error", "/register","/invalidSession").permitAll());
         http.formLogin(withDefaults());
         http.httpBasic(hbc -> hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));
         http.exceptionHandling(ehc -> ehc.accessDeniedHandler(new CustomAccessDeniedHandler()).accessDeniedPage("/denied"));
