@@ -24,6 +24,22 @@ public class projectSecurityProdConfig {
         // 1/ http.authorizeHttpRequests((requests) -> requests.anyRequest().permitAll());
         // 1/http.authorizeHttpRequests((requests) -> requests.anyRequest().denyAll());
         //   http.requiresChannel(rcc -> rcc.anyRequest().requiresSecure()) //only https traffi
+
+        //**** CROs configure**//
+//        http.cors(crs->crs.configurationSource(new CorsConfigurationSource() {
+//            @Override
+//            public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+//                CorsConfiguration  configuration=new CorsConfiguration();
+//                configuration.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
+//                configuration.setAllowedMethods(Collections.singletonList("*"));
+//                configuration.setAllowCredentials(true);
+//                configuration.setAllowedHeaders(Collections.singletonList("*"));
+//                configuration.setMaxAge(3600L);
+//
+//                return configuration;
+//            }
+//        }))
+
         http.sessionManagement(smc -> smc.invalidSessionUrl("/invalidSession").maximumSessions(1).maxSessionsPreventsLogin(true))
                 .requiresChannel(rcc -> rcc.anyRequest().requiresInsecure())//only http
 

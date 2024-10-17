@@ -15,7 +15,7 @@ public class Notices {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name="notice_id")
+    @Column(name = "notice_id")
     private int noticeId;
 
     @Column(name = "notice_summary")
