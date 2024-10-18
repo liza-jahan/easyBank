@@ -64,6 +64,7 @@ public class projectSecurityConfig {
 
       //  http
                 .csrf(csrfConfig-> csrfConfig.csrfTokenRequestHandler(csrfTokenRequestAttributeHandler)
+                        .ignoringRequestMatchers("/contact","/notices")
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .addFilterAfter(new CsrfCookieFilter(),BasicAuthenticationFilter.class)
                 .sessionManagement(smc -> smc.invalidSessionUrl("/invalidSession"
@@ -73,7 +74,7 @@ public class projectSecurityConfig {
                 .requiresChannel(rcc -> rcc.anyRequest().requiresInsecure())//only http
               //  .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((requests) -> requests.requestMatchers("/my-account", "/my-balance").authenticated()
-                        .requestMatchers("/notices", "/user", "/error", "/register", "/invalidSession").permitAll());
+                        .requestMatchers( "/user", "/error", "/register", "/invalidSession").permitAll());
         http.formLogin(withDefaults());
         http.httpBasic(hbc -> hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));
         //  http.exceptionHandling(ehc-> ehc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));// It is an Global Config
