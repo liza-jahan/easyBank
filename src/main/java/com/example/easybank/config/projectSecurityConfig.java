@@ -43,16 +43,16 @@ public class projectSecurityConfig {
         // 1/ http.authorizeHttpRequests((requests) -> requests.anyRequest().permitAll());
         // 1/http.authorizeHttpRequests((requests) -> requests.anyRequest().denyAll());
 
-        CsrfTokenRequestAttributeHandler csrfTokenRequestAttributeHandler=new CsrfTokenRequestAttributeHandler();
+        CsrfTokenRequestAttributeHandler csrfTokenRequestAttributeHandler = new CsrfTokenRequestAttributeHandler();
 
         http.securityContext(contextConfig -> contextConfig.requireExplicitSave(false))
-                .sessionManagement(sessionConfig ->sessionConfig.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
+                .sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
 
                 //.cors(crs->crs.configurationSource(new CorsConfigurationSource() {
 //                    @Override
 //                    public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 //                     CorsConfiguration  configuration=new CorsConfiguration();
-//                     configuration.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
+//                     configuration.setAllowedOrigins(Collections.singletonList("https://localhost:4200"));
 //                     configuration.setAllowedMethods(Collections.singletonList("*"));
 //                     configuration.setAllowCredentials(true);
 //                     configuration.setAllowedHeaders(Collections.singletonList("*"));
@@ -62,19 +62,30 @@ public class projectSecurityConfig {
 //                    }
 //                }))
 
-      //  http
-                .csrf(csrfConfig-> csrfConfig.csrfTokenRequestHandler(csrfTokenRequestAttributeHandler)
-                        .ignoringRequestMatchers("/contact","/notices")
+                //  http
+                .csrf(csrfConfig -> csrfConfig.csrfTokenRequestHandler(csrfTokenRequestAttributeHandler)
+                        .ignoringRequestMatchers("/contact", "/notices")
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
-                .addFilterAfter(new CsrfCookieFilter(),BasicAuthenticationFilter.class)
+                .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
                 .sessionManagement(smc -> smc.invalidSessionUrl("/invalidSession"
-                ).maximumSessions(3)
+                        ).maximumSessions(3)
                         .maxSessionsPreventsLogin(true))
 
                 .requiresChannel(rcc -> rcc.anyRequest().requiresInsecure())//only http
-              //  .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests((requests) -> requests.requestMatchers("/my-account", "/my-balance").authenticated()
-                        .requestMatchers( "/user", "/error", "/register", "/invalidSession").permitAll());
+                //  .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests((requests) -> requests
+//                        .requestMatchers("/my-account").hasAuthority("VIEWACCOUNT")
+//                        .requestMatchers("/my-balance").hasAnyAuthority("VIEWBALANCE", "VIEWACCOUNT")
+//                        .requestMatchers("/myLoans").hasAuthority("VIEWLOANS")
+//                        // .requestMatchers("/my-account", "/my-balance","/myLoans").authenticated()
+//                        .requestMatchers("/user").authenticated()
+
+
+                        .requestMatchers("/my-account").hasRole("USER")
+                        .requestMatchers("/my-balance").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers("/myLoans").hasRole("USER")
+                        .requestMatchers("/user").authenticated()
+                        .requestMatchers( "/error", "/register", "/invalidSession").permitAll());
         http.formLogin(withDefaults());
         http.httpBasic(hbc -> hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));
         //  http.exceptionHandling(ehc-> ehc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));// It is an Global Config
