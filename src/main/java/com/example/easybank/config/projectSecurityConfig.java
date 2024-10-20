@@ -2,7 +2,10 @@ package com.example.easybank.config;
 
 import com.example.easybank.exceptionhandling.CustomAccessDeniedHandler;
 import com.example.easybank.exceptionhandling.CustomBasicAuthenticationEntryPoint;
+import com.example.easybank.filter.AuthoritiesLoggingAtFilter;
 import com.example.easybank.filter.CsrfCookieFilter;
+import com.example.easybank.filter.RequestValidationAfterFilter;
+import com.example.easybank.filter.RequestValidationBeforeFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,7 +47,6 @@ public class projectSecurityConfig {
         // 1/http.authorizeHttpRequests((requests) -> requests.anyRequest().denyAll());
 
         CsrfTokenRequestAttributeHandler csrfTokenRequestAttributeHandler = new CsrfTokenRequestAttributeHandler();
-
         http.securityContext(contextConfig -> contextConfig.requireExplicitSave(false))
                 .sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
 
@@ -67,6 +69,9 @@ public class projectSecurityConfig {
                         .ignoringRequestMatchers("/contact", "/notices")
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
+                .addFilterBefore(new RequestValidationBeforeFilter(),BasicAuthenticationFilter.class)
+                .addFilterAfter(new RequestValidationAfterFilter(),BasicAuthenticationFilter.class)
+                .addFilterAt(new AuthoritiesLoggingAtFilter(),BasicAuthenticationFilter.class)
                 .sessionManagement(smc -> smc.invalidSessionUrl("/invalidSession"
                         ).maximumSessions(3)
                         .maxSessionsPreventsLogin(true))

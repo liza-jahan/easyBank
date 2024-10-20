@@ -2,7 +2,10 @@ package com.example.easybank.config;
 
 import com.example.easybank.exceptionhandling.CustomAccessDeniedHandler;
 import com.example.easybank.exceptionhandling.CustomBasicAuthenticationEntryPoint;
+import com.example.easybank.filter.AuthoritiesLoggingAtFilter;
 import com.example.easybank.filter.CsrfCookieFilter;
+import com.example.easybank.filter.RequestValidationAfterFilter;
+import com.example.easybank.filter.RequestValidationBeforeFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -46,10 +49,13 @@ public class projectSecurityProdConfig {
 //            }
 //        }))
 
-             http   .csrf(csrfConfig -> csrfConfig.csrfTokenRequestHandler(csrfTokenRequestAttributeHandler)
-                .ignoringRequestMatchers("/contact", "/notices")
-                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+        http.csrf(csrfConfig -> csrfConfig.csrfTokenRequestHandler(csrfTokenRequestAttributeHandler)
+                        .ignoringRequestMatchers("/contact", "/notices")
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
+                .addFilterBefore(new RequestValidationBeforeFilter(), BasicAuthenticationFilter.class)
+                .addFilterAfter(new RequestValidationAfterFilter(), BasicAuthenticationFilter.class)
+                .addFilterAt(new AuthoritiesLoggingAtFilter(), BasicAuthenticationFilter.class)
                 .sessionManagement(smc -> smc.invalidSessionUrl("/invalidSession"
                         ).maximumSessions(3)
                         .maxSessionsPreventsLogin(true))
@@ -68,7 +74,7 @@ public class projectSecurityProdConfig {
                         .requestMatchers("/my-balance").hasAnyRole("ADMIN", "USER")
                         .requestMatchers("/myLoans").hasRole("USER")
                         .requestMatchers("/user").authenticated()
-                        .requestMatchers( "/error", "/register", "/invalidSession").permitAll());
+                        .requestMatchers("/error", "/register", "/invalidSession").permitAll());
         http.formLogin(withDefaults());
         http.httpBasic(hbc -> hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));
         //  http.exceptionHandling(ehc-> ehc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));// It is an Global Config
