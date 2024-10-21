@@ -1,22 +1,32 @@
 package com.example.easybank.controller;
 
+import com.example.easybank.constant.ApplicationConstants;
 import com.example.easybank.model.Customer;
+import com.example.easybank.model.LoginRequestDto;
+import com.example.easybank.model.LoginResponseDto;
 import com.example.easybank.repository.CustomerRepository;
 import com.example.easybank.service.EasyBankDetailsService;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import lombok.AllArgsConstructor;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.security.Principal;
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.sql.Date;
-import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @AllArgsConstructor
@@ -24,6 +34,9 @@ public class UserController {
     private final EasyBankDetailsService easyBankDetailsService;
     private final PasswordEncoder passwordEncoder;
     private final CustomerRepository customerRepository;
+    private final AuthenticationManager authenticationManager;
+    private Environment env;
+
 
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody Customer customer) {
@@ -31,8 +44,8 @@ public class UserController {
         try {
             String encodedPassword = passwordEncoder.encode(customer.getPwd());
             customer.setPwd(encodedPassword);
-            customer.setCreateDt(String.valueOf(new Date(System.currentTimeMillis())));
-            Customer  savedCustomer = customerRepository.save(customer);
+            customer.setCreateDt(new Date(System.currentTimeMillis()));
+            Customer savedCustomer = customerRepository.save(customer);
             if (savedCustomer.getId() > 0) {
                 response = ResponseEntity.status(HttpStatus.CREATED).body("Successfully registered user");
             }
@@ -46,8 +59,32 @@ public class UserController {
     public Customer getUserDetailsAfterLogin(Authentication authentication) {
         Optional<Customer> customers = customerRepository.findByEmail(authentication.getName());
 
-            return customers.orElse(null);
+        return customers.orElse(null);
 
+    }
+
+    @PostMapping("/apiLogin")
+    public ResponseEntity<LoginResponseDto> apiLogin(@RequestBody LoginRequestDto loginRequest) {
+        String jwt = "";
+        Authentication authentication = UsernamePasswordAuthenticationToken.unauthenticated(loginRequest.username(),
+                loginRequest.password());
+        Authentication authenticationResponse = authenticationManager.authenticate(authentication);
+        if (null != authenticationResponse && authenticationResponse.isAuthenticated()) {
+            if (null != env) {
+                String secret = env.getProperty(ApplicationConstants.JWT_SECRET_KEY,
+                        ApplicationConstants.JWT_SECRET_DEFAULT_VALUE);
+                SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+                jwt = Jwts.builder().setIssuer("Eazy Bank").setSubject("JWT Token")
+                        .claim("username", authenticationResponse.getName())
+                        .claim("authorities", authenticationResponse.getAuthorities().stream().map(
+                                GrantedAuthority::getAuthority).collect(Collectors.joining(",")))
+                        .setIssuedAt(new java.util.Date())
+                        .setExpiration(new java.util.Date((new java.util.Date()).getTime() + 30000000))
+                        .signWith(secretKey).compact();
+            }
+        }
+        return ResponseEntity.status(HttpStatus.OK).header(ApplicationConstants.JWT_HEADER, jwt)
+                .body(new LoginResponseDto(HttpStatus.OK.getReasonPhrase(), jwt));
     }
 }
 

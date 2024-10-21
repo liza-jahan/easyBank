@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
+import java.sql.Date;
 import java.util.Set;
 
 @Entity
@@ -30,7 +31,8 @@ public class Customer {
     private String role;
 
     @Column(name = "create_dt")
-    private String createDt;
+    @JsonIgnore
+    private Date createDt;
 
     @JsonIgnore
     @OneToMany(mappedBy = "customer", fetch = FetchType.EAGER)
